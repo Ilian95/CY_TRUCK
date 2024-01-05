@@ -116,13 +116,14 @@ if [[ "$*" == *-d1* ]]; then
 	gnuplot -e " 
 	set terminal pngcairo size 800,600; 
 	set output 'images/histogramme_d1.png'; 
+	set datafile separator ';';
 	set title 'Option -d1 : Nb Routes = f(Driver)'; 
 	set xlabel 'NB ROUTES'; 
 	set ylabel 'DRIVERS NAMES';
 	set yrange [0:*];
 	set style fill solid; 
 	unset key; 
-	plot 'temp/resultat_d1.txt' using (3):ytic(1) with boxes lc rgb 'skyblue'; 
+	plot 'temp/resultat_d1.txt' using (2):ytic(1) with boxes lc rgb 'skyblue'; 
 	set output; 
 	"
 		
