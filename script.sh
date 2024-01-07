@@ -87,7 +87,7 @@ done
 if [[ "$*" == *-d1* ]]; then
 
 	# Enregistrez le temps de début
-	start_time=$(date +%s.%N)
+	start_time=$(date +%s)
 
 	# Vérifier si le fichier existe et est un fichier régulier
 	file="$1"
@@ -100,76 +100,93 @@ if [[ "$*" == *-d1* ]]; then
 	awk -F ';' '!seen[$1,$6]++' "$file" > "$dossier_temp/unique_data.csv"
 
 	# Extraire les noms des conducteurs et le nombre de trajets avec tri et comptage
-	awk -F ';' '{if ($6 != "") count[$6] ++} END {for (name in count) print (name) ";" count[name]}' "$dossier_temp/unique_data.csv" | sort -nrt ";" -k2 | head -n 10 > "$dossier_temp/resultat_d1.txt"
+	awk -F ';' '{if ($6 != "") count[$6] ++} END {for (name in count) print (name)";"count[name]}' "$dossier_temp/unique_data.csv" | sort -nt ';' -k2 | tail -10 > "$dossier_temp/resultat_d1.txt"
 
 	# Afficher les résultats
-	awk '{print $1, $2, $3}' "$dossier_temp/resultat_d1.txt"
+	echo "TRAITEMENT [D1] ---------------:"
+	awk '{print $1, $2}' "$dossier_temp/resultat_d1.txt" | tac 
+	
+	#Affiche le graphique 
+	gnuplot "graph_d1.gp"
+	
+	image_path="images/horizontal_d1.png"
+
+	# Vérifier si xdg-open est disponible
+	if command -v xdg-open &> /dev/null; then
+	    xdg-open "$image_path"
+	else
+	    echo "xdg-open n'est pas disponible sur votre système."
+	fi
 
 	# Enregistrez le temps de fin
-	end_time=$(date +%s.%N)
+	end_time=$(date +%s)
 
 	# Calculez la différence de temps
 	execution_time=$(echo "$end_time - $start_time" | bc)
 
-	echo "Le script a pris $execution_time secondes pour s'exécuter."
-	
-	gnuplot -e " 
-	set terminal pngcairo size 800,600; 
-	set output 'images/histogramme_d1.png'; 
-	set datafile separator ';';
-	set title 'Option -d1 : Nb Routes = f(Driver)'; 
-	set xlabel 'NB ROUTES'; 
-	set ylabel 'DRIVERS NAMES';
-	set yrange [0:*];
-	set style fill solid; 
-	unset key; 
-	plot 'temp/resultat_d1.txt' using (2):ytic(1) with boxes lc rgb 'skyblue'; 
-	set output; 
-	"
+	echo -e "Le traitement [D1] a pris $execution_time secondes pour s'exécuter."
 		
 fi
 
-exit 0
-
-
 #------------------------------------------------------------------------------------------------------------------------------------------------
-# 						TRAITEMENT L
+# 						TRAITEMENT D2
 #------------------------------------------------------------------------------------------------------------------------------------------------
 
+if [[ "$*" == *-d2* ]]; then
 
-#Temps de début
-start_time=$(date +%s)
+	# Enregistrez le temps de début
+	start_time=$(date +%s)
+	
+	# Vérifier si le fichier existe et est un fichier régulier
+	file="$1"
+	if [ ! -f "$file" ]; then
+	    echo "Erreur : Le fichier $file n'existe pas."
+	    exit 6
+	fi
+	
+	
+	LC_NUMERIC="C" awk -F ';' '{
+	    conducteur = $6;   # la sixième colonne contient le conducteur
+	    distance = $5;    # la cinquième colonne contient la distance
+	    
+	    # Vérifier si le conducteur a déjà été rencontré
+	    if (count[conducteur] > 0) {
+		total_distances[conducteur] += distance;
+	    } else {
+		count[conducteur] = 1;
+		total_distances[conducteur] = distance;
+	    }
+	}
+	END {
+	    for (conducteur in total_distances) {
+		printf "%s;%0.6f\n", conducteur , total_distances[conducteur];
+	    }
+	}' "$file" | sort -nt ';' -k2 | tail -10 > "$dossier_temp/resultat_d2.txt"
+	
+	# Afficher les résultats
+	echo "TRAITEMENT [D2] : ---------------"
+	awk '{print $1, $2}' "$dossier_temp/resultat_d2.txt" | tac 
+	
+	#Affiche le graphique 
+	gnuplot "graph_d2.gp"
+	
+	image_path="images/horizontal_d2.png"
 
-fichier="$1"
+	# Vérifier si xdg-open est disponible
+	if command -v xdg-open &> /dev/null; then
+	    xdg-open "$image_path"
+	else
+	    echo "xdg-open n'est pas disponible sur votre système."
+	fi
 
-# Traitement [L]
-if [[ "$*" == *-l* ] ]; then
-        # Extraire et trier les colonnes nécessaires pour le traitement [L]
-        sort -t ';' -k5nr "$fichier" | head -10 | sort -t ';' -k1 | cut -d ';' -f1,5 > temp_donnes.txt
-        # Affiche les données récuperer
-        cat temp_donnes.txt
-        # Créer un graphique avec Gnuplot
-        gnuplot -e "
-                set terminal pngcairo size 800,600;
-                set output 'images/histogramme_l.png';
-                set datafile separator ';';
-                set title 'Option -l';
-                set xlabel 'Route ID';
-                set ylabel 'Distance';
-                set yrange [0:*];
-                set style fill solid;
-                unset key;
-                plot 'temp_donnes.txt' using (2):ytic(1) with boxes lc rgb 'skyblue'; 
-                set output;
-                "
+	# Enregistrez le temps de fin
+	end_time=$(date +%s)
+
+	# Calculez la différence de temps
+	execution_time=$(echo "$end_time - $start_time" | bc)
+
+	echo "Le traitement [D2] a pris $execution_time secondes pour s'exécuter."
 
 fi
-
-# Calculer et afficher la durée d'exécution
-end_time=$(date +%s)
-temps=$((end_time - start_time))
-echo "Durée d'exécution: $temps secondes"
-
-echo "Traitement [L] terminé."
 
 exit 0
