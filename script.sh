@@ -136,7 +136,6 @@ exit 0
 # 						TRAITEMENT L
 #------------------------------------------------------------------------------------------------------------------------------------------------
 
-#!/bin/bash
 
 #Temps de début
 start_time=$(date +%s)
@@ -145,22 +144,24 @@ fichier="$1"
 
 # Traitement [L]
 if [[ "$*" == *-l* ] ]; then
- 	# Extraire et trier les colonnes nécessaires pour le traitement [L]
-	sort -t ';' -k5nr "$fichier" | head -10 | sort -t ';' -k1 | cut -d ';' -f1,5 > temp_donnes.txt
-	# Créer un graphique avec Gnuplot
-	gnuplot -e "
-		set terminal pngcairo size 800,600;
-		set output 'images/histogramme_l.png';
-		set datafile separator ';';
-		set title 'Option -l';
-		set xlabel 'Route ID';
-		set ylabel 'Distance';
-		set yrange [0:*];
-		set style fill solid;
-		unset key;
-		plot 'temp_donnes.txt' using (2):ytic(1) with boxes lc rgb 'skyblue'; 
-		set output;
-		"
+        # Extraire et trier les colonnes nécessaires pour le traitement [L]
+        sort -t ';' -k5nr "$fichier" | head -10 | sort -t ';' -k1 | cut -d ';' -f1,5 > temp_donnes.txt
+        # Affiche les données récuperer
+        cat temp_donnes.txt
+        # Créer un graphique avec Gnuplot
+        gnuplot -e "
+                set terminal pngcairo size 800,600;
+                set output 'images/histogramme_l.png';
+                set datafile separator ';';
+                set title 'Option -l';
+                set xlabel 'Route ID';
+                set ylabel 'Distance';
+                set yrange [0:*];
+                set style fill solid;
+                unset key;
+                plot 'temp_donnes.txt' using (2):ytic(1) with boxes lc rgb 'skyblue'; 
+                set output;
+                "
 
 fi
 
