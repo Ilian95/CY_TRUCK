@@ -106,8 +106,29 @@ if [[ "$*" == *-d1* ]]; then
 	echo "TRAITEMENT [D1] ---------------:"
 	awk '{print $1, $2}' "$dossier_temp/resultat_d1.txt" | tac 
 	
-	#Affiche le graphique 
-	gnuplot "graph_d1.gp"
+	#Ecris le script du gnuplot
+	gnuplot_d1="
+	#Crée le graphique
+
+	set terminal pngcairo size 800,600
+	set output 'images/horizontal_d1.png'
+	set datafile separator\";\"
+	set title 'Option -d1 : Nb routes = f(Driver)'
+	set xlabel 'NB ROUTES'
+	set ylabel 'DRIVERS NAMES'
+	set yrange [0:*]
+	set style fill solid
+	unset key
+	myBoxWidth = 0.8
+	set offsets 0,0,0.7-myBoxWidth/2.,0.7
+	plot 'temp/resultat_d1.txt' using (0.5*\$2):0:(0.5*\$2):(myBoxWidth/2.):(2):ytic(1) with boxxy lc var
+	set output
+	"
+	# Écris le script Gnuplot dans un fichier temporaire
+	echo "$gnuplot_d1" > "$dossier_temp"/graph_d1.gp
+
+	# Exécuter le script Gnuplot
+	gnuplot "$dossier_temp"/graph_d1.gp
 	
 	image_path="images/horizontal_d1.png"
 
@@ -115,7 +136,7 @@ if [[ "$*" == *-d1* ]]; then
 	if command -v xdg-open &> /dev/null; then
 	    xdg-open "$image_path"
 	else
-	    echo "xdg-open n'est pas disponible sur votre système."
+	    echo "xdg-open n'est pas disponible sur votre système,le graphique ne pourra pas s'afficher."
 	fi
 
 	# Enregistrez le temps de fin
@@ -144,12 +165,12 @@ if [[ "$*" == *-d2* ]]; then
 	    exit 6
 	fi
 	
-	
+	#Trie les 10 plus grandes distances dans un fichier temporaire
 	LC_NUMERIC="C" awk -F ';' '{
 	    conducteur = $6;   # la sixième colonne contient le conducteur
 	    distance = $5;    # la cinquième colonne contient la distance
 	    
-	    # Vérifier si le conducteur a déjà été rencontré
+	    # Vérifier si le conducteur est en doublon
 	    if (count[conducteur] > 0) {
 		total_distances[conducteur] += distance;
 	    } else {
@@ -167,16 +188,38 @@ if [[ "$*" == *-d2* ]]; then
 	echo "TRAITEMENT [D2] : ---------------"
 	awk '{print $1, $2}' "$dossier_temp/resultat_d2.txt" | tac 
 	
-	#Affiche le graphique 
-	gnuplot "graph_d2.gp"
+	#Ecris le contenu du script gnuplot
+	gnuplot_d2="
+	#Crée le graphique
+
+	set terminal pngcairo size 800,600   
+	set output 'images/horizontal_d2.png'
+	set datafile separator\";\"
+	set title 'Option -d2 : Distance = f(Driver)'
+	set xlabel 'Distance (Km)'
+	set ylabel 'DRIVERS NAMES'
+	set yrange [0:*]      
+	set style fill solid   
+	unset key             
+	myBoxWidth = 0.8
+	set offsets 0,0,0.7-myBoxWidth/2.,0.7
+	plot 'temp/resultat_d2.txt' using (0.5*\$2):0:(0.5*\$2):(myBoxWidth/2.):(2):ytic(1) with boxxy lc var
+	set output 
+	"
+	# Écris le script Gnuplot dans un fichier temporaire
+	echo "$gnuplot_d2" > "$dossier_temp/graph_d2.gp"
+
+	# Exécuter le script Gnuplot
+	gnuplot "$dossier_temp/graph_d2.gp"
 	
+	#Affiche le Graphique
 	image_path="images/horizontal_d2.png"
 
 	# Vérifier si xdg-open est disponible
 	if command -v xdg-open &> /dev/null; then
 	    xdg-open "$image_path"
 	else
-	    echo "xdg-open n'est pas disponible sur votre système."
+	    echo "xdg-open n'est pas disponible sur votre système, le graphique ne pourra pas s'afficher."
 	fi
 
 	# Enregistrez le temps de fin
@@ -187,6 +230,41 @@ if [[ "$*" == *-d2* ]]; then
 
 	echo "Le traitement [D2] a pris $execution_time secondes pour s'exécuter."
 
+fi
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# 						TRAITEMENT L
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
+if [[ "$*" == *-l* ]]; then
+
+	#Temps de début
+	start_time=$(date +%s)
+
+	# Vérifier si le fichier existe et est un fichier régulier
+	file="$1"
+	if [ ! -f "$file" ]; then
+	    echo "Erreur : Le fichier $file n'existe pas."
+	    exit 6
+	fi
+
+	#Calculer la somme des distances pour chaque trajet
+	LC_NUMERIC='C' awk -F';' '{sum[$1]+=$5} END {for (id in sum) printf "%d;%0.6f\n", id, sum[id]}' "$file" > "$dossier_temp/distances_totales.txt"
+
+	#Recupère les 10 trajets les plus long
+	sort -t ';' -k2nr "$dossier_temp/distances_totales.txt" | head -10 | sort -t ';' -k1nr > "$dossier_temp/resultat.txt"
+	
+	# Affiche le resultat
+	cat "$dossier_temp/resultat.txt"	
+		
+	# Enregistrez le temps de fin
+	end_time=$(date +%s)
+	
+	# Calculez la différence de temps
+	execution_time=$((end_time - start_time))
+	
+	echo "Le traitement [L] a pris $execution_time secondes pour s'exécuter."
+	
 fi
 
 exit 0
