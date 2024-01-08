@@ -255,7 +255,41 @@ if [[ "$*" == *-l* ]]; then
 	sort -t ';' -k2nr "$dossier_temp/distances_totales.txt" | head -10 | sort -t ';' -k1nr > "$dossier_temp/resultat.txt"
 	
 	# Affiche le resultat
-	cat "$dossier_temp/resultat.txt"	
+	cat "$dossier_temp/resultat.txt"
+	
+	#Ecris le contenu du script gnuplot
+	gnuplot_l="
+	#Créée le graphique
+	set terminal pngcairo size 800,600   
+	set output 'images/vertical_l.png'
+	set datafile separator\";\"
+	set title 'Option -l : Distance = f(Route)'
+	set xlabel 'ROUTE ID'
+	set ylabel 'Distance (km)'
+	set xrange [-0.5:]
+	set yrange [0:*]
+	set style data histograms    
+	set style fill solid   
+	unset key             
+	myBoxWidth = 5.0
+	plot 'temp/resultat.txt' using 2:xticlabels(1) notitle lc rgb 'green';
+	set output 
+	"
+	# Écris le script Gnuplot dans un fichier temporaire
+	echo "$gnuplot_l" > "$dossier_temp/graph_l.gp"
+
+	# Exécuter le script Gnuplot
+	gnuplot "$dossier_temp/graph_l.gp"
+	
+	#Affiche le Graphique
+	image_path="images/vertical_l.png"		
+	
+	# Vérifier si xdg-open est disponible
+	if command -v xdg-open &> /dev/null; then
+	    xdg-open "$image_path"
+	else
+	    echo "xdg-open n'est pas disponible sur votre système, le graphique ne pourra pas s'afficher."
+	fi
 		
 	# Enregistrez le temps de fin
 	end_time=$(date +%s)
