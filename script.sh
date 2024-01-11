@@ -87,17 +87,17 @@ done
 if [[ "$*" == *-d1* ]]; then
 
 	# Enregistrez le temps de début
-	start_time=$(date +%s)
+	debut=$(date +%s)
 
 	# Vérifier si le fichier existe et est un fichier régulier
-	file="$1"
-	if [ ! -f "$file" ]; then
-	    echo "Erreur : Le fichier $file n'existe pas."
+	fichier="$1"
+	if [ ! -f "$fichier" ]; then
+	    echo "Erreur : Le fichier $fichier n'existe pas."
 	    exit 6
 	fi
 
 	# Supprimer les doublons dans les colonnes 1 et 6
-	awk -F ';' '!seen[$1,$6]++' "$file" > "$dossier_temp/unique_data.csv"
+	awk -F ';' '!seen[$1,$6]++' "$fichier" > "$dossier_temp/unique_data.csv"
 
 	# Extraire les noms des conducteurs et le nombre de trajets avec tri et comptage
 	awk -F ';' '{if ($6 != "") count[$6] ++} END {for (name in count) print (name)";"count[name]}' "$dossier_temp/unique_data.csv" | sort -nt ';' -k2 | tail -10 > "$dossier_temp/resultat_d1.txt"
@@ -116,12 +116,12 @@ if [[ "$*" == *-d1* ]]; then
 	set title 'Option -d1 : Nb routes = f(Driver)'
 	set xlabel 'NB ROUTES'
 	set ylabel 'DRIVERS NAMES'
-	set yrange [0:*]
+	set yrange [-0.75:9.75]
 	set style fill solid
 	unset key
 	myBoxWidth = 0.8
-	set offsets 0,0,0.7-myBoxWidth/2.,0.7
-	plot 'temp/resultat_d1.txt' using (0.5*\$2):0:(0.5*\$2):(myBoxWidth/2.):(2):ytic(1) with boxxy lc var
+	set boxwidth myBoxWidth
+	plot 'temp/resultat_d1.txt' using (0.5*\$2):0:(0.5*\$2):(myBoxWidth/2.):(2):ytic(1) with boxxy lc var 
 	set output
 	"
 	# Écris le script Gnuplot dans un fichier temporaire
@@ -130,22 +130,22 @@ if [[ "$*" == *-d1* ]]; then
 	# Exécuter le script Gnuplot
 	gnuplot "$dossier_temp"/graph_d1.gp
 	
-	image_path="images/horizontal_d1.png"
+	image_chemin="images/horizontal_d1.png"
 
 	# Vérifier si xdg-open est disponible
 	if command -v xdg-open &> /dev/null; then
-	    xdg-open "$image_path"
+	    xdg-open "$image_chemin"
 	else
 	    echo "xdg-open n'est pas disponible sur votre système,le graphique ne pourra pas s'afficher."
 	fi
 
 	# Enregistrez le temps de fin
-	end_time=$(date +%s)
+	fin=$(date +%s)
 
 	# Calculez la différence de temps
-	execution_time=$(echo "$end_time - $start_time" | bc)
+	temps=$(echo "$fin - $debut" | bc)
 
-	echo -e "Le traitement [D1] a pris $execution_time secondes pour s'exécuter."
+	echo -e "Le traitement [D1] a pris $temps secondes pour s'exécuter."
 		
 fi
 
@@ -156,12 +156,12 @@ fi
 if [[ "$*" == *-d2* ]]; then
 
 	# Enregistrez le temps de début
-	start_time=$(date +%s)
+	debut=$(date +%s)
 	
 	# Vérifier si le fichier existe et est un fichier régulier
-	file="$1"
-	if [ ! -f "$file" ]; then
-	    echo "Erreur : Le fichier $file n'existe pas."
+	fichier="$1"
+	if [ ! -f "$fichier" ]; then
+	    echo "Erreur : Le fichier $fichier n'existe pas."
 	    exit 6
 	fi
 	
@@ -182,7 +182,7 @@ if [[ "$*" == *-d2* ]]; then
 	    for (conducteur in total_distances) {
 		printf "%s;%0.6f\n", conducteur , total_distances[conducteur];
 	    }
-	}' "$file" | sort -nt ';' -k2 | tail -10 > "$dossier_temp/resultat_d2.txt"
+	}' "$fichier" | sort -nt ';' -k2 | tail -10 > "$dossier_temp/resultat_d2.txt"
 	
 	# Afficher les résultats
 	echo "TRAITEMENT [D2] : ---------------"
@@ -198,11 +198,11 @@ if [[ "$*" == *-d2* ]]; then
 	set title 'Option -d2 : Distance = f(Driver)'
 	set xlabel 'Distance (Km)'
 	set ylabel 'DRIVERS NAMES'
-	set yrange [0:*]      
+	set yrange [-0.75:9.75]      
 	set style fill solid   
 	unset key             
 	myBoxWidth = 0.8
-	set offsets 0,0,0.7-myBoxWidth/2.,0.7
+	set boxwidth myBoxWidth
 	plot 'temp/resultat_d2.txt' using (0.5*\$2):0:(0.5*\$2):(myBoxWidth/2.):(2):ytic(1) with boxxy lc var
 	set output 
 	"
@@ -213,22 +213,22 @@ if [[ "$*" == *-d2* ]]; then
 	gnuplot "$dossier_temp/graph_d2.gp"
 	
 	#Affiche le Graphique
-	image_path="images/horizontal_d2.png"
+	image_chemin="images/horizontal_d2.png"
 
 	# Vérifier si xdg-open est disponible
 	if command -v xdg-open &> /dev/null; then
-	    xdg-open "$image_path"
+	    xdg-open "$image_chemin"
 	else
 	    echo "xdg-open n'est pas disponible sur votre système, le graphique ne pourra pas s'afficher."
 	fi
 
 	# Enregistrez le temps de fin
-	end_time=$(date +%s)
+	fin=$(date +%s)
 
 	# Calculez la différence de temps
-	execution_time=$(echo "$end_time - $start_time" | bc)
+	temps=$(echo "$fin - $debut" | bc)
 
-	echo "Le traitement [D2] a pris $execution_time secondes pour s'exécuter."
+	echo "Le traitement [D2] a pris $temps secondes pour s'exécuter."
 
 fi
 
@@ -239,23 +239,24 @@ fi
 if [[ "$*" == *-l* ]]; then
 
 	#Temps de début
-	start_time=$(date +%s)
+	debut=$(date +%s)
 
 	# Vérifier si le fichier existe et est un fichier régulier
-	file="$1"
-	if [ ! -f "$file" ]; then
-	    echo "Erreur : Le fichier $file n'existe pas."
-	    exit 6
+	fichier="$1"
+	if [ ! -f "$fichier" ]; then
+	    echo "Erreur : Le fichier $fichier n'existe pas."
+	    exit 7
 	fi
 
 	#Calculer la somme des distances pour chaque trajet
-	LC_NUMERIC='C' awk -F';' '{sum[$1]+=$5} END {for (id in sum) printf "%d;%0.6f\n", id, sum[id]}' "$file" > "$dossier_temp/distances_totales.txt"
+	LC_NUMERIC='C' awk -F';' '{sum[$1]+=$5} END {for (id in sum) printf "%d;%0.6f\n", id, sum[id]}' "$fichier" > "$dossier_temp/unique_l.txt"
 
 	#Recupère les 10 trajets les plus long
-	sort -t ';' -k2nr "$dossier_temp/distances_totales.txt" | head -10 | sort -t ';' -k1nr > "$dossier_temp/resultat.txt"
+	sort -t ';' -k2nr "$dossier_temp/unique_l.txt" | head -10 | sort -t ';' -k1nr > "$dossier_temp/resultat_l.txt"
 	
 	# Affiche le resultat
-	cat "$dossier_temp/resultat.txt"
+	echo "TRAITEMENT [L] : ---------------"
+	cat "$dossier_temp/resultat_l.txt"
 	
 	#Ecris le contenu du script gnuplot
 	gnuplot_l="
@@ -266,13 +267,13 @@ if [[ "$*" == *-l* ]]; then
 	set title 'Option -l : Distance = f(Route)'
 	set xlabel 'ROUTE ID'
 	set ylabel 'Distance (km)'
-	set xrange [-0.5:]
-	set yrange [0:*]
-	set style data histograms    
+	set xrange [-0.75:*]
+	set yrange [0:*]    
 	set style fill solid   
 	unset key             
-	myBoxWidth = 5.0
-	plot 'temp/resultat.txt' using 2:xticlabels(1) notitle lc rgb 'green';
+	myBoxWidth = 0.8
+	set boxwidth myBoxWidth
+	plot 'temp/resultat_l.txt' using 2:xtic(1) with boxes lc rgb '#39A77C'
 	set output 
 	"
 	# Écris le script Gnuplot dans un fichier temporaire
@@ -282,22 +283,58 @@ if [[ "$*" == *-l* ]]; then
 	gnuplot "$dossier_temp/graph_l.gp"
 	
 	#Affiche le Graphique
-	image_path="images/vertical_l.png"		
+	image_chemin="images/vertical_l.png"		
 	
 	# Vérifier si xdg-open est disponible
 	if command -v xdg-open &> /dev/null; then
-	    xdg-open "$image_path"
+	    xdg-open "$image_chemin"
 	else
 	    echo "xdg-open n'est pas disponible sur votre système, le graphique ne pourra pas s'afficher."
-	fi
+	fi	
 		
 	# Enregistrez le temps de fin
-	end_time=$(date +%s)
+	fin=$(date +%s)
 	
 	# Calculez la différence de temps
-	execution_time=$((end_time - start_time))
+	temps=$((fin - debut))
 	
-	echo "Le traitement [L] a pris $execution_time secondes pour s'exécuter."
+	echo "Le traitement [L] a pris $temps secondes pour s'exécuter."
+	
+fi
+
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# 						TRAITEMENT T
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
+if [[ "$*" == *-t* ]]; then
+
+	#Temps de début
+	debut=$(date +%s)
+
+	# Vérifier si le fichier existe et est un fichier régulier
+	fichier="$1"
+	if [ ! -f "$fichier" ]; then
+	    echo "Erreur : Le fichier $fichier n'existe pas."
+	    exit 8
+	fi
+	
+	# Affiche le resultat
+	echo "TRAITEMENT [T] : ---------------"
+	
+	#Compile et execute le programme c
+	gcc -o 'progc/exec' 'progc/hello.c'
+	./'progc/exec' "$fichier" > "$dossier_temp/resultat_t.txt"
+	
+	#Affiche le resultat
+	cat "$dossier_temp/resultat_t.txt" | head
+		
+	# Enregistrez le temps de fin
+	fin=$(date +%s)
+	
+	# Calculez la différence de temps
+	temps=$((fin - debut))
+	
+	echo "Le traitement [T] a pris $temps secondes pour s'exécuter."
 	
 fi
 
