@@ -4,152 +4,17 @@
 #include<assert.h>
 
 int main(int argc, char *argv[]) {
+	typedef struct {
+	char nom[200];
+	int occurrences;
+    }Ville;
 
-    // ===============================================
-    // 			Verifications
-    // ===============================================
     
     //Verifie les arguments
     if (argc != 2) {
         fprintf(stderr, "PROGRAMME C : Usage: %s <nom_du_fichier>\n", argv[0]);
         return 1;
     }
-    
-    // ===============================================
-    //			Création AVL
-    // ===============================================
-    
-    //Crée la struct qui permet de faire l'AVL
-    typedef struct _Arbre {
-  	struct _Arbre *pDroit;
-  	struct _Arbre *pGauche;
-  	char* Ville;
-  	int Nb_Trajets;
-  	int Nb_Departs;
-  	int eq;
-    } Arbre;
-    
-    //Fonction qui crée l'arbre binaire
-    Arbre *creerArbre(char* V,int T, int D) {
-  	Arbre *pNouv = malloc(sizeof(Arbre));
-  	if (pNouv == NULL) {
-    		exit(1);
-  	}
-  	pNouv->pDroit = NULL;
-  	pNouv->pGauche = NULL;
-  	pNouv->Ville = malloc(sizeof(char) * strlen(V));
-  	if(pNouv->Ville == NULL) {
-  		printf("Allocation échouée");
-  		exit(2);
-  	}
-  	strcpy(pNouv->Ville, V); 
-  	pNouv->Nb_Trajets = T;
-  	pNouv->Nb_Departs = D;
-  	pNouv->eq = 0;
-     	return pNouv;
-    }
-    
-    // Verifie si l'arbre est vide
-    int estVide(Arbre *p) { 
-    	return p == NULL; 
-    }
-    
-    // Verifie si le fils gauche est vide
-    int A_FilsGauche(Arbre *p) { 
-    	return !estVide(p) && (p->pGauche != NULL); 
-    }
-
-    // Verifie si le fils droit est vide
-    int A_FilsDroit(Arbre *p) { 
-    	return !estVide(p) && (p->pDroit != NULL); 
-    }
-    
-    //Ajoute un fils Gauche
-    void ajtFilsGauche(Arbre *p, char* V, int T, int D) {
-  	assert(!estVide(p));
-  	if (A_FilsGauche(p)) {
-    		exit(3);
-  	}
-  	p->pGauche = creerArbre(V, T, D);
-	if (p->pGauche == NULL) {
-	  exit(4);
-	}
-    }
-
-    // Ajoute un fils droit
-    void ajtFilsDroit(Arbre *p, char* V, int T, int D) {
-  	assert(!estVide(p));
-	if (A_FilsDroit(p)) {
-	  exit(5);
-	}
-	p->pDroit = creerArbre(V, T, D);
-	if (p->pDroit == NULL) {
-	  exit(6);
-	}
-    }
-     
-    // Parcours de l'arbre
-    void infixe(Arbre *p) {
-  	if (!estVide(p)) {
-	    infixe(p->pGauche);
-	    printf("%s;%d;%d\n", p->Ville, p->Nb_Trajets, p->Nb_Departs);
-	    infixe(p->pDroit);
-	}
-    }
-    
-    // Permet de changer la valeur des occurences d'un noeud
-    Arbre *changeNoeud(Arbre *a, char* V, int T, int D) {
-  	if (a == NULL) {
-    		exit(7);
-  	} 
-  	a->Nb_Trajets = T;
-  	a->Nb_Departs = D;
-  	return a;
-    }
-    
-    // Libère l'espace allouer par l'arbre
-    void LibereArbre(Arbre *a) {
-  	if (a == NULL) {
-    		exit(8);
-  	}
-  	if (A_FilsGauche(a)) {
-    		LibereArbre(a->pGauche);
-  	}
-  	if (A_FilsDroit(a)) {
-    		LibereArbre(a->pDroit);
-  	}
-  	a->pGauche = NULL;
-  	a->pDroit = NULL;
-  	free(a);
-    }
-    
-    // Permet de construire un ABR
-    Arbre *insereABR(Arbre *a, char* V, int T, int D) {
-	if (a == NULL) {
-	  creerArbre(V, T, D);
-	}
-	else if (T <= a->Nb_Trajets) {
-	  if (A_FilsGauche(a)) {
-	    insereABR(a->pGauche, V, T, D);
-	  } 
-	  else {
-	    ajtFilsGauche(a, V, T, D);
-	  }
-	} 
-	else {
-	  if (A_FilsDroit(a)) {
-	    insereABR(a->pDroit, V, T, D);
-	  } else {
-	    ajtFilsDroit(a, V, T, D);
-	  }
-	}
-	return a;
-    }
-
-    
-    // ===============================================
-    // 			Programme
-    // ===============================================
 
     // Ouvrir le fichier en lecture
     FILE *fichier = fopen(argv[1], "r");
@@ -159,10 +24,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Compte le nb de ligne du fichier et affiche colonne 2 et 3 (VILLE)
-    int Nb_lignes = 0;
-    char ligne[200];  
+    int Nb_villes = 0;
+    char ligne[200];
+    
+    Ville* ville = NULL;
+    
 
     while (fgets(ligne, sizeof(ligne), fichier) != NULL) {
+    
+    	char *pos = strchr(ligne, '\n');
+	if (pos != NULL) {
+	    *pos = '\0';
+	}
+    
         char *token = strtok(ligne, ";");
 
         // Parcourir les colonnes jusqu'à la 2e et 3e (VILLE)
@@ -171,23 +45,68 @@ int main(int argc, char *argv[]) {
             if (token != NULL) {
             	// Afficher la 2e colonne
                 if (i == 2) {
-                    printf("%s;", token);
+                    int villeTrouvee = 0;
+                    
+                    for(int j =0; j<Nb_villes; j++){
+                    	if(strcmp(ville[j].nom, token) == 0){
+                    		ville[j].occurrences++;
+                    		villeTrouvee = 1;
+                    		break;
+                    	}
+                    }
+                    
+                    if (!villeTrouvee){
+                    	ville = realloc(ville, (Nb_villes+1) * sizeof(Ville));
+                    	if(ville == NULL){
+                    	 	printf("ERREUR SEGMENTATION FAULT !!!");
+                    	 	exit(15);
+                    	}
+                    	
+                    	strcpy(ville[Nb_villes].nom, token);
+                    	ville[Nb_villes].occurrences = 1;
+                    	Nb_villes++;
+                    }
+
                 }
                 // Afficher la 3e colonne
                 if (i == 3) {
-                    printf("%s \n", token);
+                    int villeTrouvee = 0;
+                    
+                    for(int j =0; j<Nb_villes; j++){
+                    	if(strcmp(ville[j].nom, token) == 0){
+                    		ville[j].occurrences++;
+                    		villeTrouvee = 1;
+                    		break;
+                    	}
+                    }
+                    
+                    if (!villeTrouvee){
+                    	ville = realloc(ville, (Nb_villes+1) * sizeof(Ville));
+                    	if(ville == NULL){
+                    	 	printf("ERREUR SEGMENTATION FAULT !!!");
+                    	 	exit(15);
+                    	}
+                    	
+                    	strcpy(ville[Nb_villes].nom, token);
+                    	ville[Nb_villes].occurrences = 1;
+                    	Nb_villes++;
+                    }
                 }
             } 
             else {
                 break; // Si la ligne n'a pas assez de colonnes
             }
         }
-        Nb_lignes++;
     }
-    printf("Le fichier %s contient %d lignes.\n",argv[1], Nb_lignes);
+    
+    for(int i = 0; i<Nb_villes;i++){
+    	printf("%s;%d\n", ville[i].nom, ville[i].occurrences);
+    }
 
     // Fermer le fichier
     fclose(fichier);
 
+    free(ville);	
+	
     return 0;
 }
