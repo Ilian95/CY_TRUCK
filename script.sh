@@ -338,7 +338,7 @@ if [[ "$*" == *-t* ]]; then
 	set ylabel 'NB ROUTES'
 	set style data histograms
 	set xtics border in scale 0,0 mirror rotate by -45 autojustify
-	set xrange [0:*]
+	set xrange [*:*]
 	set yrange [0:3500]    
 	set style fill solid               
 	myBoxWidth = 2
