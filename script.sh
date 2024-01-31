@@ -11,7 +11,7 @@ if [[ "$*" == *-h* ]]; then
 fi
 
 #Verifie le nb d'arguments
-if [ "$#" -lt 2 ]; then
+if [ "$#" -ne 2 ]; then
 	echo "Erreur: Utilisation : $0 [chemin_du_fichier] [traitement1] [traitement2] [traitement3]..."
 	exit 1
 fi
@@ -323,10 +323,43 @@ if [[ "$*" == *-t* ]]; then
 	
 	#Compile et execute le programme c
 	gcc -o 'progc/exec' 'progc/hello.c'
-	./'progc/exec' "$fichier" > "$dossier_temp/resultat_t.txt"
+	./'progc/exec' > "$dossier_temp/resultat_t.txt"
 	
-	#Affiche le resultat
-	cat "$dossier_temp/resultat_t.txt" | head
+	cat "$dossier_temp/resultat_t.txt"
+	
+	#Ecris le contenu du script gnuplot
+	gnuplot_t="
+	#Créée le graphique
+	set terminal pngcairo size 800,600   
+	set output 'images/graph_t.png'
+	set datafile separator\";\"
+	set title 'Option -t : Nb routes = f(Towns)'
+	set xlabel 'TOWN NAMES'
+	set ylabel 'NB ROUTES'
+	set style data histograms
+	set xtics border in scale 0,0 mirror rotate by -45 autojustify
+	set xrange [0:*]
+	set yrange [0:3500]    
+	set style fill solid               
+	myBoxWidth = 2
+	set boxwidth myBoxWidth
+	plot 'temp/resultat_t.txt' using 2:xtic(1) title 'Total routes' lc rgb '#19DE91', '' u 3 title 'First town' lc rgb '#39A77C'
+	"
+	# Écris le script Gnuplot dans un fichier temporaire
+	echo "$gnuplot_t" > "$dossier_temp/graph_t.gp"
+
+	# Exécuter le script Gnuplot
+	gnuplot "$dossier_temp/graph_t.gp"
+	
+	#Affiche le Graphique
+	image_chemin="images/graph_t.png"		
+	
+	# Vérifier si xdg-open est disponible
+	if command -v xdg-open &> /dev/null; then
+	    xdg-open "$image_chemin"
+	else
+	    echo "xdg-open n'est pas disponible sur votre système, le graphique ne pourra pas s'afficher."
+	fi	
 		
 	# Enregistrez le temps de fin
 	fin=$(date +%s)
