@@ -421,7 +421,6 @@ int main() {
 
     qsort(topVilles, nbVillesTop, sizeof(Avl *), comparerVilles);
 
-    printf("Les 10 villes avec le plus de visites :\n");
     for (int i = 0; i < nbVillesTop && i < MAX_VILLES; i++) {
         printf("%s;%d;%d\n", topVilles[i]->nom, topVilles[i]->totalVisites, topVilles[i]->Visites_D);
     }
