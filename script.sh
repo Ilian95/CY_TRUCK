@@ -371,4 +371,49 @@ if [[ "$*" == *-t* ]]; then
 	
 fi
 
+#------------------------------------------------------------------------------------------------------------------------------------------------
+# 						TRAITEMENT S
+#------------------------------------------------------------------------------------------------------------------------------------------------
+
+if [[ "$*" == *-s* ]]; then
+
+	#Temps de début
+	debut=$(date +%s)
+
+	# Vérifier si le fichier existe et est un fichier régulier
+	fichier="$1"
+	if [ ! -f "$fichier" ]; then
+	    echo "Erreur : Le fichier $fichier n'existe pas."
+	    exit 9
+	fi
+	
+	# Affiche le resultat
+	echo "TRAITEMENT [S] : ---------------"
+	
+
+	#Compile et execute le programme c
+	
+	awk -F";" ' FNR > 1 {print $1 ";" $5}' "$fichier" > "$dossier_temp/calcul_s.csv"
+	
+	gcc -o 'progc/exec' 'progc/filtre.c'
+	./'progc/exec' "$fichier" > "$dossier_temp/filtre_s.csv"
+	
+
+	gcc -o 'progc/exec' 'progc/trie.c'
+	./'progc/exec' "$fichier" > "$dossier_temp/resultat_s.csv"
+
+	cat "$dossier_temp/resultat_s.csv"
+	
+	# Enregistrez le temps de fin
+	fin=$(date +%s)
+	
+	# Calculez la différence de temps
+	temps=$((fin - debut))
+	
+	echo "Le traitement [S] a pris $temps secondes pour s'exécuter."
+	
+fi
+
 exit 0
+
+
