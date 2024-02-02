@@ -22,7 +22,7 @@ gnuplot
 
 Afin de compiler les differents traitement: 
 
-- Compilez une premiere fois le programme en utilisant la commande suivante `./script.sh data/data.csv`, Après avoir fait cela on peut donc compiler le programme en ajoutant cette fois ci l'option correspondant au traitement de son choix. 
+- Compilez une premiere fois le programme en utilisant la commande suivante `./script.sh data/data.csv`, Après avoir fait cela on peut donc compiler le programme en ajoutant cette fois ci l'option correspondant au traitement de son choix.  
 `./script.sh data/data.csv -d1` pour le traitement d1  
 `./script.sh data/data.csv -d2` pour le traitement d2  
 `./script.sh data/data.csv -l` pour le traitement L  
