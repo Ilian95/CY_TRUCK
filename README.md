@@ -35,8 +35,9 @@ Attention, pour les traitements t et s il est nécéssaire d'entrer dans le doss
 
 ## La présentation des dossiers du projet
 
-Le projet est divisé en 3 dossiers  
+Le projet est divisé en 4 dossiers  
 
  - Le dossier data stocke le fichier data.csv
  - le dossier progc stocke les programmes C
  - le dossier demo  stocke les résultat chiffrés des traitements
+ - le dossier image stocke les graphiques générés par les traitements
