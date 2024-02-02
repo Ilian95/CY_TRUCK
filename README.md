@@ -28,13 +28,14 @@ Afin de compiler les differents traitement:
 `./script.sh data/data.csv -l` pour le traitement L  
 `./script.sh data/data.csv -t` pour le traitement T  
 `./script.sh data/data.csv -S` pour le traitement S       
-Le graphique correspondant au traitement executé s'ouvrira dans une fenetre après l'execution d'une de ces commandes 
+Le graphique correspondant au traitement executé s'ouvrira dans une fenetre après l'execution d'une de ces commandes  
+Attention, pour les traitements t et s il est nécéssaire d'entrer dans le dossier progc puis executer le make avant d'executer le script comme précédemment.
+
 
 ## La présentation des dossiers du projet
 
-Le projet est divisé en 4 dossiers  
+Le projet est divisé en 3 dossiers  
 
  - Le dossier data stocke le fichier data.csv
  - le dossier progc stocke les programmes C
- - le dossier images stocke les graphiques des traitements 
  - le dossier demo  stocke les résultat chiffrés des traitements
