@@ -27,7 +27,8 @@ Afin de compiler les differents traitement:
 `./script.sh data/data.csv -d2` pour le traitement d2  
 `./script.sh data/data.csv -l` pour le traitement L  
 `./script.sh data/data.csv -t` pour le traitement T  
-`./script.sh data/data.csv -S` pour le traitement S       
+`./script.sh data/data.csv -S` pour le traitement S
+`./script.sh data/data.csv -h` pour une documentation d'aide sur les fonctionnalités          
 Le graphique correspondant au traitement executé s'ouvrira dans une fenetre après l'execution d'une de ces commandes  
 Attention, pour les traitements t et s il est nécéssaire d'entrer dans le dossier progc puis executer le make avant d'executer le script comme précédemment.
 
