@@ -11,7 +11,7 @@ if [[ "$*" == *-h* ]]; then
 fi
 
 #Verifie le nb d'arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
 	echo "Erreur: Utilisation : $0 [chemin_du_fichier] [traitement1] [traitement2] [traitement3]..."
 	exit 1
 fi
@@ -321,11 +321,16 @@ if [[ "$*" == *-t* ]]; then
 	# Affiche le resultat
 	echo "TRAITEMENT [T] : ---------------"
 	
+	cd progc/
+	make -s
+	./exec> "../$dossier_temp/resultat_t.txt"
+	cd ..
 	#Compile et execute le programme c
-	gcc -o 'progc/exec' 'progc/hello.c'
-	./'progc/exec' > "$dossier_temp/resultat_t.txt"
+	#gcc -o 'progc/exec' 'progc/hello.c'
+	#./'progc/exec' > "$dossier_temp/resultat_t.txt"
 	
 	cat "$dossier_temp/resultat_t.txt"
+	
 	
 	#Ecris le contenu du script gnuplot
 	gnuplot_t="
@@ -415,5 +420,4 @@ if [[ "$*" == *-s* ]]; then
 fi
 
 exit 0
-
 
