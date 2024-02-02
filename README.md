@@ -30,7 +30,7 @@ Afin de compiler les differents traitement:
 `./script.sh data/data.csv -S` pour le traitement S  
 `./script.sh data/data.csv -h` pour une documentation d'aide sur les fonctionnalités          
 Le graphique correspondant au traitement executé s'ouvrira dans une fenetre après l'execution d'une de ces commandes  
-Attention, pour les traitements t et s il est nécéssaire d'entrer dans le dossier progc puis executer le make avant d'executer le script comme précédemment.
+Attention, pour les traitements t et s il est nécéssaire d'entrer dans le dossier progc puis executer le make en écrivant simplemant make dans le terminal avant d'executer le script comme précédemment.
 
 
 ## La présentation des dossiers du projet
